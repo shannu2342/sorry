@@ -791,27 +791,6 @@ export default function ApologyClient() {
       >
         {musicOn ? 'Music On' : 'Music Off'}
       </button>
-      <div className="playlist-panel">
-        <label htmlFor="musicTrack">Playlist</label>
-        <select
-          id="musicTrack"
-          value={musicTrack}
-          onChange={(e) => setMusicTrack(e.target.value)}
-        >
-          <option value="piano">Soft Piano</option>
-          <option value="rain">Rain</option>
-          <option value="ambient">Ambient</option>
-        </select>
-        <label htmlFor="musicVolume">Volume: {musicVolume}%</label>
-        <input
-          id="musicVolume"
-          type="range"
-          min="0"
-          max="100"
-          value={musicVolume}
-          onChange={(e) => setMusicVolume(Number(e.target.value))}
-        />
-      </div>
       <div className="atmosphere-toggle" role="group" aria-label="Atmosphere mode">
         <button
           type="button"
@@ -827,16 +806,6 @@ export default function ApologyClient() {
         >
           Rain
         </button>
-      </div>
-      <div className="story-mode">
-        <button
-          type="button"
-          className={`story-btn ${storyModeOn ? 'is-live' : ''}`}
-          onClick={() => setStoryModeOn((prev) => !prev)}
-        >
-          {storyModeOn ? 'Stop Story Mode' : 'Start Story Mode'}
-        </button>
-        {storyModeOn && <p className="story-cue">{storyCue || 'Cinematic story mode running...'}</p>}
       </div>
 
       <header className="hero shell" id="top" ref={(el) => (revealRef.current[0] = el)}>
