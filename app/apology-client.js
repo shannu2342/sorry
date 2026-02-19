@@ -112,7 +112,7 @@ function redirectWhatsApp(message) {
 }
 
 export default function ApologyClient() {
-  const scenes = ['top', 'letter', 'constellation', 'repair', 'challenge', 'effort', 'vault', 'meterZone', 'gardenArea', 'final'];
+  const scenes = ['top', 'letter', 'constellation', 'repair', 'challenge', 'effort', 'vault', 'meterZone', 'gardenArea', 'certificate', 'final'];
   const [typedText, setTypedText] = useState('');
   const [meterValue, setMeterValue] = useState(84);
   const [meterText, setMeterText] = useState(meterStates[2]);
@@ -131,6 +131,10 @@ export default function ApologyClient() {
   const [loaderVisible, setLoaderVisible] = useState(true);
   const [loaderProgress, setLoaderProgress] = useState(0);
   const [loaderChapter, setLoaderChapter] = useState(loaderChapters[0]);
+  const [atmosphereMode, setAtmosphereMode] = useState('petals');
+  const [signature, setSignature] = useState('Your Name');
+  const [certificateDate, setCertificateDate] = useState('');
+  const [certificateReady, setCertificateReady] = useState(false);
 
   const skyRef = useRef(null);
   const waveRef = useRef(null);
@@ -382,30 +386,50 @@ export default function ApologyClient() {
 
     resize();
 
-    for (let i = 0; i < 180; i += 1) {
+    const count = atmosphereMode === 'rain' ? 240 : 180;
+    for (let i = 0; i < count; i += 1) {
       dots.push({
         x: Math.random() * sky.width,
         y: Math.random() * sky.height,
         r: Math.random() * 1.9 + 0.4,
-        s: Math.random() * 0.45 + 0.09,
-        a: Math.random() * 0.6 + 0.12
+        s: atmosphereMode === 'rain' ? Math.random() * 6 + 8 : Math.random() * 0.45 + 0.09,
+        a: Math.random() * 0.6 + 0.12,
+        drift: Math.random() * 0.8 + 0.2
       });
     }
 
     let rafId;
+    let tick = 0;
     const animate = () => {
+      tick += 0.03;
       ctx.clearRect(0, 0, sky.width, sky.height);
       dots.forEach((dot) => {
-        dot.y -= dot.s;
-        if (dot.y < -8) {
-          dot.y = sky.height + 8;
-          dot.x = Math.random() * sky.width;
+        if (atmosphereMode === 'rain') {
+          dot.y += dot.s;
+          if (dot.y > sky.height + 10) {
+            dot.y = -10;
+            dot.x = Math.random() * sky.width;
+          }
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(220, 236, 255, ${Math.min(0.9, dot.a + 0.15)})`;
+          ctx.lineWidth = 1.2;
+          ctx.moveTo(dot.x, dot.y);
+          ctx.lineTo(dot.x - 2, dot.y + dot.s * 1.6);
+          ctx.stroke();
+        } else {
+          dot.y -= dot.s;
+          dot.x += Math.sin(tick + dot.y * 0.01) * dot.drift * 0.2;
+          if (dot.y < -8) {
+            dot.y = sky.height + 8;
+            dot.x = Math.random() * sky.width;
+          }
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(255, 220, 235, ${dot.a})`;
+          ctx.ellipse(dot.x, dot.y, dot.r * 1.4, dot.r, Math.sin(dot.y * 0.02), 0, Math.PI * 2);
+          ctx.fill();
         }
-
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(255, 220, 235, ${dot.a})`;
-        ctx.arc(dot.x, dot.y, dot.r, 0, Math.PI * 2);
-        ctx.fill();
+        if (dot.x < -10) dot.x = sky.width + 10;
+        if (dot.x > sky.width + 10) dot.x = -10;
       });
 
       rafId = requestAnimationFrame(animate);
@@ -418,7 +442,89 @@ export default function ApologyClient() {
       window.removeEventListener('resize', resize);
       cancelAnimationFrame(rafId);
     };
-  }, []);
+  }, [atmosphereMode]);
+
+  const getToday = () =>
+    new Date().toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
+    });
+
+  const downloadCertificate = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1600;
+    canvas.height = 1000;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, '#3c0c26');
+    gradient.addColorStop(0.55, '#7d1d4d');
+    gradient.addColorStop(1, '#b73777');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    for (let i = 0; i < 150; i += 1) {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
+      const r = Math.random() * 2 + 0.5;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.strokeStyle = 'rgba(255, 227, 242, 0.8)';
+    ctx.lineWidth = 6;
+    ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
+    ctx.strokeStyle = 'rgba(255, 227, 242, 0.35)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(60, 60, canvas.width - 120, canvas.height - 120);
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffe8f6';
+    ctx.font = '700 64px Georgia';
+    ctx.fillText('CERTIFICATE OF SINCERE EFFORT', canvas.width / 2, 180);
+
+    ctx.font = '500 34px Segoe UI';
+    ctx.fillStyle = '#ffd6ec';
+    ctx.fillText('A heartfelt commitment to repair trust through actions', canvas.width / 2, 250);
+
+    const lines = [
+      `This certifies a sincere apology journey for Jiya Rani Madam Ji.`,
+      `From: ${signature || 'Your Name'}`,
+      `Date: ${certificateDate || getToday()}`,
+      `Challenge Progress: ${weeklyProgress}%`,
+      `Apology Flowers Planted: ${flowers.length}`,
+      `Atmosphere Mode: ${atmosphereMode === 'rain' ? 'Rain' : 'Petals'}`
+    ];
+
+    ctx.textAlign = 'left';
+    ctx.font = '600 38px Segoe UI';
+    ctx.fillStyle = '#fff2fa';
+    let y = 390;
+    lines.forEach((line) => {
+      ctx.fillText(line, 160, y);
+      y += 88;
+    });
+
+    ctx.textAlign = 'right';
+    ctx.font = 'italic 44px Georgia';
+    ctx.fillStyle = '#ffe7f5';
+    ctx.fillText(signature || 'Your Name', canvas.width - 160, 860);
+
+    ctx.textAlign = 'left';
+    ctx.font = '600 24px Segoe UI';
+    ctx.fillStyle = '#ffd4ea';
+    ctx.fillText('Signed with accountability, consistency, and respect.', 160, 920);
+
+    const url = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'jiya-rani-madam-ji-effort-certificate.png';
+    a.click();
+  };
 
   const meterFill = `${meterValue}%`;
 
@@ -533,6 +639,22 @@ export default function ApologyClient() {
       >
         {musicOn ? 'Music On' : 'Music Off'}
       </button>
+      <div className="atmosphere-toggle" role="group" aria-label="Atmosphere mode">
+        <button
+          type="button"
+          className={`atmosphere-btn ${atmosphereMode === 'petals' ? 'is-active' : ''}`}
+          onClick={() => setAtmosphereMode('petals')}
+        >
+          Petals
+        </button>
+        <button
+          type="button"
+          className={`atmosphere-btn ${atmosphereMode === 'rain' ? 'is-active' : ''}`}
+          onClick={() => setAtmosphereMode('rain')}
+        >
+          Rain
+        </button>
+      </div>
 
       <header className="hero shell" id="top" ref={(el) => (revealRef.current[0] = el)}>
         <p className="eyebrow reveal show">This is all effort, all heart, no excuses</p>
@@ -725,7 +847,46 @@ export default function ApologyClient() {
           </article>
         </section>
 
-        <section className="section shell reveal" id="final" ref={(el) => (revealRef.current[11] = el)}>
+        <section className="section shell reveal" id="certificate" ref={(el) => (revealRef.current[11] = el)}>
+          <h2>Effort Certificate</h2>
+          <p>A promise document that marks this apology as effort, not words.</p>
+          <div className="certificate-controls">
+            <label htmlFor="sigInput">Your Signature</label>
+            <input
+              id="sigInput"
+              type="text"
+              value={signature}
+              onChange={(e) => setSignature(e.target.value)}
+              placeholder="Type your name"
+            />
+            <button
+              className="btn btn--primary"
+              onClick={() => {
+                setCertificateDate(getToday());
+                setCertificateReady(true);
+                chime(audioCtxRef, 700, 0.08);
+              }}
+            >
+              Generate Certificate
+            </button>
+          </div>
+          {certificateReady && (
+            <article className="certificate-card">
+              <h3>Certificate Of Sincere Effort</h3>
+              <p>This certifies a real commitment to repair trust through action and consistency.</p>
+              <p><strong>For:</strong> Jiya Rani Madam Ji</p>
+              <p><strong>From:</strong> {signature || 'Your Name'}</p>
+              <p><strong>Date:</strong> {certificateDate}</p>
+              <p><strong>Challenge Progress:</strong> {weeklyProgress}%</p>
+              <p><strong>Flowers Planted:</strong> {flowers.length}</p>
+              <div className="certificate-actions">
+                <button className="btn btn--ghost" onClick={downloadCertificate}>Download PNG Certificate</button>
+              </div>
+            </article>
+          )}
+        </section>
+
+        <section className="section shell reveal" id="final" ref={(el) => (revealRef.current[12] = el)}>
           <h2>If Your Heart Says Forgived</h2>
           <p>
             Clicking any option below instantly opens WhatsApp to `+91 8639121263` with your selected message.
