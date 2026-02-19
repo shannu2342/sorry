@@ -270,6 +270,41 @@ footer {
   border-color: rgba(255, 133, 196, 0.95);
 }
 
+.story-mode {
+  position: fixed;
+  left: 16px;
+  bottom: 98px;
+  z-index: 45;
+  width: min(280px, 76vw);
+}
+
+.story-btn {
+  width: 100%;
+  border: 1px solid rgba(255, 214, 237, 0.5);
+  background: rgba(255, 239, 248, 0.12);
+  color: #ffe6f4;
+  border-radius: 12px;
+  padding: 0.55rem 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.story-btn.is-live {
+  background: linear-gradient(90deg, rgba(255, 193, 228, 0.75), rgba(255, 102, 170, 0.88));
+  color: #4b0e2c;
+  border-color: rgba(255, 131, 196, 0.95);
+}
+
+.story-cue {
+  margin: 0.42rem 0 0;
+  border: 1px solid rgba(255, 218, 239, 0.34);
+  background: rgba(42, 6, 26, 0.55);
+  color: #ffe2f2;
+  border-radius: 10px;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.82rem;
+}
+
 .ribbon {
   position: fixed;
   inset: -15% -20%;
@@ -1114,5 +1149,11 @@ footer a {
   .atmosphere-toggle {
     left: 12px;
     bottom: 52px;
+  }
+
+  .story-mode {
+    left: 12px;
+    bottom: 95px;
+    width: min(240px, 70vw);
   }
 }

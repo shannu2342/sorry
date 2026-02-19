@@ -141,7 +141,11 @@ export default function ApologyClient() {
   const [emotionLevel, setEmotionLevel] = useState(68);
   const [capsuleText, setCapsuleText] = useState('');
   const [capsuleSavedAt, setCapsuleSavedAt] = useState('');
+  const [storyModeOn, setStoryModeOn] = useState(false);
+  const [storyIndex, setStoryIndex] = useState(0);
+  const [storyCue, setStoryCue] = useState('');
   const holdTimerRef = useRef(null);
+  const storyTimerRef = useRef(null);
 
   const skyRef = useRef(null);
   const waveRef = useRef(null);
@@ -477,6 +481,33 @@ export default function ApologyClient() {
     if (savedAt) setCapsuleSavedAt(savedAt);
   }, []);
 
+  useEffect(() => {
+    if (!storyModeOn) {
+      if (storyTimerRef.current) clearInterval(storyTimerRef.current);
+      setStoryCue('');
+      return undefined;
+    }
+
+    const sequence = scenes.filter((id) => id !== 'top');
+    const tick = () => {
+      setStoryIndex((prev) => {
+        const next = prev >= sequence.length - 1 ? 0 : prev + 1;
+        const id = sequence[next];
+        const node = document.getElementById(id);
+        if (node) node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setStoryCue(`Now entering: ${id.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase())}`);
+        chime(audioCtxRef, 520 + (next % 6) * 45, 0.05);
+        return next;
+      });
+    };
+
+    tick();
+    storyTimerRef.current = setInterval(tick, 3800);
+    return () => {
+      if (storyTimerRef.current) clearInterval(storyTimerRef.current);
+    };
+  }, [storyModeOn]);
+
   const getToday = () =>
     new Date().toLocaleDateString('en-IN', {
       day: '2-digit',
@@ -741,6 +772,16 @@ export default function ApologyClient() {
           Rain
         </button>
       </div>
+      <div className="story-mode">
+        <button
+          type="button"
+          className={`story-btn ${storyModeOn ? 'is-live' : ''}`}
+          onClick={() => setStoryModeOn((prev) => !prev)}
+        >
+          {storyModeOn ? 'Stop Story Mode' : 'Start Story Mode'}
+        </button>
+        {storyModeOn && <p className="story-cue">{storyCue || 'Cinematic story mode running...'}</p>}
+      </div>
 
       <header className="hero shell" id="top" ref={(el) => (revealRef.current[0] = el)}>
         <p className="eyebrow reveal show">This is all effort, all heart, no excuses</p>
@@ -937,17 +978,10 @@ export default function ApologyClient() {
           <h2>Effort Certificate</h2>
           <p>A promise document that marks this apology as effort, not words.</p>
           <div className="certificate-controls">
-            <label htmlFor="sigInput">Signature</label>
-            <input
-              id="sigInput"
-              type="text"
-              value={signature}
-              onChange={(e) => setSignature(e.target.value)}
-              placeholder="shannu"
-            />
             <button
               className="btn btn--primary"
               onClick={() => {
+                setSignature('shannu');
                 setCertificateDate(getToday());
                 setCertificateReady(true);
                 chime(audioCtxRef, 700, 0.08);
