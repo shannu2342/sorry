@@ -21,7 +21,7 @@ const starNotes = [
   'I should have listened before speaking.',
   'I should have protected your peace.',
   'I should have valued your trust more carefully.',
-  'I should have controlled my ego and stayed kind.',
+  'I should have accepted my fault and stayed kind.',
   'I should have acted with emotional maturity.',
   'I should have chosen patience over reaction.',
   'I should have made you feel safe with me.',
@@ -35,7 +35,7 @@ const timelineItems = [
   },
   {
     label: 'Protect your peace',
-    detail: 'I will protect your peace even when my ego wants to argue.'
+    detail: 'I will protect your peace even when I feel I am at fault.'
   },
   {
     label: 'Be transparent',
@@ -53,12 +53,12 @@ const effortCards = [
   'Anger control and patience practice',
   'Zero excuses, full responsibility',
   'Consistency over empty promises',
-  'Your peace above my ego'
+  'Your peace above everything'
 ];
 
 const vaultNotes = [
   'I will never normalize your pain again.',
-  'I will communicate with calm, not ego.',
+  'I will communicate with calm, and accept my fault.',
   'I will earn trust slowly and honestly.',
   'I will respect your emotional boundaries.',
   'I will be answerable to my words.',
@@ -112,7 +112,7 @@ function redirectWhatsApp(message) {
 }
 
 export default function ApologyClient() {
-  const scenes = ['top', 'letter', 'constellation', 'repair', 'challenge', 'effort', 'vault', 'meterZone', 'gardenArea', 'certificate', 'final'];
+  const scenes = ['top', 'letter', 'constellation', 'repair', 'challenge', 'effort', 'vault', 'meterZone', 'gardenArea', 'certificate', 'reactor', 'orbit', 'final'];
   const [typedText, setTypedText] = useState('');
   const [meterValue, setMeterValue] = useState(84);
   const [meterText, setMeterText] = useState(meterStates[2]);
@@ -132,9 +132,13 @@ export default function ApologyClient() {
   const [loaderProgress, setLoaderProgress] = useState(0);
   const [loaderChapter, setLoaderChapter] = useState(loaderChapters[0]);
   const [atmosphereMode, setAtmosphereMode] = useState('petals');
-  const [signature, setSignature] = useState('Your Name');
+  const [signature, setSignature] = useState('shannu');
   const [certificateDate, setCertificateDate] = useState('');
   const [certificateReady, setCertificateReady] = useState(false);
+  const [reactorEnergy, setReactorEnergy] = useState(15);
+  const [orbitHearts, setOrbitHearts] = useState([]);
+  const [orbitScore, setOrbitScore] = useState(0);
+  const holdTimerRef = useRef(null);
 
   const skyRef = useRef(null);
   const waveRef = useRef(null);
@@ -444,6 +448,25 @@ export default function ApologyClient() {
     };
   }, [atmosphereMode]);
 
+  useEffect(() => {
+    const spawn = setInterval(() => {
+      const id = Date.now() + Math.random();
+      const item = {
+        id,
+        x: 8 + Math.random() * 84,
+        size: 20 + Math.random() * 22,
+        drift: (Math.random() - 0.5) * 28,
+        duration: 4200 + Math.random() * 2600
+      };
+      setOrbitHearts((prev) => [...prev.slice(-14), item]);
+      setTimeout(() => {
+        setOrbitHearts((prev) => prev.filter((h) => h.id !== id));
+      }, item.duration + 80);
+    }, 900);
+
+    return () => clearInterval(spawn);
+  }, []);
+
   const getToday = () =>
     new Date().toLocaleDateString('en-IN', {
       day: '2-digit',
@@ -493,7 +516,7 @@ export default function ApologyClient() {
 
     const lines = [
       `This certifies a sincere apology journey for Jiya Rani Madam Ji.`,
-      `From: ${signature || 'Your Name'}`,
+      `From: ${signature || 'shannu'}`,
       `Date: ${certificateDate || getToday()}`,
       `Challenge Progress: ${weeklyProgress}%`,
       `Apology Flowers Planted: ${flowers.length}`,
@@ -512,7 +535,7 @@ export default function ApologyClient() {
     ctx.textAlign = 'right';
     ctx.font = 'italic 44px Georgia';
     ctx.fillStyle = '#ffe7f5';
-    ctx.fillText(signature || 'Your Name', canvas.width - 160, 860);
+    ctx.fillText(signature || 'shannu', canvas.width - 160, 860);
 
     ctx.textAlign = 'left';
     ctx.font = '600 24px Segoe UI';
@@ -579,6 +602,32 @@ export default function ApologyClient() {
 
   const checkedCount = checks.filter(Boolean).length;
   const weeklyProgress = Math.round((checkedCount / checks.length) * 100);
+  const reactorMessage =
+    reactorEnergy < 35
+      ? 'Warming up my apology with accountability.'
+      : reactorEnergy < 70
+        ? 'My apology is deeper, calmer, and more responsible.'
+        : 'Full sincerity mode: accepting fault and proving change through action.';
+
+  const startReactorCharge = () => {
+    if (holdTimerRef.current) return;
+    holdTimerRef.current = setInterval(() => {
+      setReactorEnergy((prev) => (prev >= 100 ? 100 : prev + 2));
+    }, 45);
+  };
+
+  const stopReactorCharge = () => {
+    if (holdTimerRef.current) {
+      clearInterval(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+  };
+
+  const collectOrbitHeart = (id) => {
+    setOrbitHearts((prev) => prev.filter((h) => h.id !== id));
+    setOrbitScore((prev) => (prev >= 99 ? 100 : prev + 5));
+    chime(audioCtxRef, 540 + Math.random() * 120, 0.05);
+  };
 
   return (
     <>
@@ -875,7 +924,7 @@ export default function ApologyClient() {
               <h3>Certificate Of Sincere Effort</h3>
               <p>This certifies a real commitment to repair trust through action and consistency.</p>
               <p><strong>For:</strong> Jiya Rani Madam Ji</p>
-              <p><strong>From:</strong> {signature || 'Your Name'}</p>
+              <p><strong>From:</strong> {signature || 'shannu'}</p>
               <p><strong>Date:</strong> {certificateDate}</p>
               <p><strong>Challenge Progress:</strong> {weeklyProgress}%</p>
               <p><strong>Flowers Planted:</strong> {flowers.length}</p>
@@ -886,10 +935,64 @@ export default function ApologyClient() {
           )}
         </section>
 
-        <section className="section shell reveal" id="final" ref={(el) => (revealRef.current[12] = el)}>
+        <section className="section shell reveal" id="reactor" ref={(el) => (revealRef.current[12] = el)}>
+          <h2>Heart Pulse Reactor</h2>
+          <p>Press and hold to charge this apology with full responsibility.</p>
+          <div className="reactor-wrap">
+            <div className="reactor-orb" style={{ '--energy': `${reactorEnergy}%` }}>
+              <span>{reactorEnergy}%</span>
+            </div>
+            <div className="reactor-side">
+              <button
+                className="btn btn--primary"
+                onMouseDown={startReactorCharge}
+                onMouseUp={stopReactorCharge}
+                onMouseLeave={stopReactorCharge}
+                onTouchStart={startReactorCharge}
+                onTouchEnd={stopReactorCharge}
+              >
+                Hold To Charge
+              </button>
+              <button className="btn btn--ghost" onClick={() => setReactorEnergy(15)}>Reset</button>
+              <p className="vault-message">{reactorMessage}</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="section shell reveal orbit" id="orbit" ref={(el) => (revealRef.current[13] = el)}>
+          <h2>Apology Orbit Lab</h2>
+          <p>Catch the floating hearts. Each one adds sincerity energy to this apology.</p>
+          <div className="orbit-stage">
+            {orbitHearts.map((heart) => (
+              <button
+                key={heart.id}
+                type="button"
+                className="orbit-heart"
+                style={{
+                  left: `${heart.x}%`,
+                  width: `${heart.size}px`,
+                  height: `${heart.size}px`,
+                  '--drift': `${heart.drift}px`,
+                  '--dur': `${heart.duration}ms`
+                }}
+                onClick={() => collectOrbitHeart(heart.id)}
+                aria-label="Collect sincerity heart"
+              >
+                ❤
+              </button>
+            ))}
+            <div className="orbit-hud">
+              <span>Sincerity Collected: {orbitScore}%</span>
+              <div className="orbit-bar"><div style={{ width: `${orbitScore}%` }} /></div>
+              <small>{orbitScore >= 70 ? 'Unlocked: Deep sincerity mode.' : 'Collect hearts to unlock deep sincerity mode.'}</small>
+            </div>
+          </div>
+        </section>
+
+        <section className="section shell reveal" id="final" ref={(el) => (revealRef.current[14] = el)}>
           <h2>If Your Heart Says Forgived</h2>
           <p>
-            Clicking any option below instantly opens WhatsApp to `+91 8639121263` with your selected message.
+            No pressure. I respect your feelings and your timing, always.
           </p>
           <div className="hero__actions">
             <button
