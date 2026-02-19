@@ -112,7 +112,7 @@ function redirectWhatsApp(message) {
 }
 
 export default function ApologyClient() {
-  const scenes = ['top', 'letter', 'constellation', 'repair', 'challenge', 'effort', 'vault', 'meterZone', 'gardenArea', 'certificate', 'reactor', 'orbit', 'final'];
+  const scenes = ['top', 'letter', 'constellation', 'repair', 'challenge', 'effort', 'vault', 'meterZone', 'gardenArea', 'certificate', 'reactor', 'orbit', 'theater', 'capsule', 'final'];
   const [typedText, setTypedText] = useState('');
   const [meterValue, setMeterValue] = useState(84);
   const [meterText, setMeterText] = useState(meterStates[2]);
@@ -138,6 +138,9 @@ export default function ApologyClient() {
   const [reactorEnergy, setReactorEnergy] = useState(15);
   const [orbitHearts, setOrbitHearts] = useState([]);
   const [orbitScore, setOrbitScore] = useState(0);
+  const [emotionLevel, setEmotionLevel] = useState(68);
+  const [capsuleText, setCapsuleText] = useState('');
+  const [capsuleSavedAt, setCapsuleSavedAt] = useState('');
   const holdTimerRef = useRef(null);
 
   const skyRef = useRef(null);
@@ -467,6 +470,13 @@ export default function ApologyClient() {
     return () => clearInterval(spawn);
   }, []);
 
+  useEffect(() => {
+    const saved = window.localStorage.getItem('apology_capsule_text');
+    const savedAt = window.localStorage.getItem('apology_capsule_saved_at');
+    if (saved) setCapsuleText(saved);
+    if (savedAt) setCapsuleSavedAt(savedAt);
+  }, []);
+
   const getToday = () =>
     new Date().toLocaleDateString('en-IN', {
       day: '2-digit',
@@ -602,6 +612,7 @@ export default function ApologyClient() {
 
   const checkedCount = checks.filter(Boolean).length;
   const weeklyProgress = Math.round((checkedCount / checks.length) * 100);
+  const loaderChapterIndex = Math.max(0, loaderChapters.indexOf(loaderChapter));
   const reactorMessage =
     reactorEnergy < 35
       ? 'Warming up my apology with accountability.'
@@ -629,13 +640,39 @@ export default function ApologyClient() {
     chime(audioCtxRef, 540 + Math.random() * 120, 0.05);
   };
 
+  const emotionMessage =
+    emotionLevel < 30
+      ? 'I am quietly reflecting on my fault and learning.'
+      : emotionLevel < 60
+        ? 'I am speaking with honesty and full responsibility.'
+        : emotionLevel < 85
+          ? 'I am deeply sorry and focused on real change.'
+          : 'I am fully committed to repair trust with sustained actions.';
+
+  const saveCapsule = () => {
+    const now = new Date().toLocaleString('en-IN');
+    window.localStorage.setItem('apology_capsule_text', capsuleText);
+    window.localStorage.setItem('apology_capsule_saved_at', now);
+    setCapsuleSavedAt(now);
+    chime(audioCtxRef, 740, 0.07);
+  };
+
   return (
     <>
       {loaderVisible && (
         <div className="cine-loader">
+          <div className="cine-loader__ambient" aria-hidden="true" />
           <div className="cine-loader__card">
             <p className="cine-loader__label">Crafting A Sincere Apology Experience</p>
             <h2>{loaderChapter}</h2>
+            <div className="cine-loader__steps">
+              {loaderChapters.map((chapter, idx) => (
+                <span
+                  key={chapter}
+                  className={`cine-loader__step ${idx <= loaderChapterIndex ? 'is-active' : ''}`}
+                />
+              ))}
+            </div>
             <div className="cine-loader__bar">
               <div className="cine-loader__fill" style={{ width: `${loaderProgress}%` }} />
             </div>
@@ -900,13 +937,13 @@ export default function ApologyClient() {
           <h2>Effort Certificate</h2>
           <p>A promise document that marks this apology as effort, not words.</p>
           <div className="certificate-controls">
-            <label htmlFor="sigInput">Your Signature</label>
+            <label htmlFor="sigInput">Signature</label>
             <input
               id="sigInput"
               type="text"
               value={signature}
               onChange={(e) => setSignature(e.target.value)}
-              placeholder="Type your name"
+              placeholder="shannu"
             />
             <button
               className="btn btn--primary"
@@ -989,7 +1026,51 @@ export default function ApologyClient() {
           </div>
         </section>
 
-        <section className="section shell reveal" id="final" ref={(el) => (revealRef.current[14] = el)}>
+        <section className="section shell reveal theater" id="theater" ref={(el) => (revealRef.current[14] = el)}>
+          <h2>Emotion Theater</h2>
+          <p>Shift this dial to watch the apology tone evolve in real-time.</p>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={emotionLevel}
+            onChange={(e) => setEmotionLevel(Number(e.target.value))}
+          />
+          <div className="theater-stage">
+            <div className="theater-glow" style={{ opacity: `${0.2 + emotionLevel / 140}` }} />
+            <p className="theater-line">{emotionMessage}</p>
+            <span className="theater-meter">Emotion Depth: {emotionLevel}%</span>
+          </div>
+        </section>
+
+        <section className="section shell reveal capsule" id="capsule" ref={(el) => (revealRef.current[15] = el)}>
+          <h2>Future Promise Capsule</h2>
+          <p>Write a promise for your future self. It stays saved in this browser.</p>
+          <textarea
+            className="capsule-textarea"
+            rows="5"
+            value={capsuleText}
+            onChange={(e) => setCapsuleText(e.target.value)}
+            placeholder="I will keep proving my apology with actions every single day..."
+          />
+          <div className="hero__actions">
+            <button className="btn btn--primary" onClick={saveCapsule}>Save Capsule</button>
+            <button
+              className="btn btn--ghost"
+              onClick={() => {
+                setCapsuleText('');
+                window.localStorage.removeItem('apology_capsule_text');
+                window.localStorage.removeItem('apology_capsule_saved_at');
+                setCapsuleSavedAt('');
+              }}
+            >
+              Clear Capsule
+            </button>
+          </div>
+          <p className="vault-message">{capsuleSavedAt ? `Saved at: ${capsuleSavedAt}` : 'Not saved yet.'}</p>
+        </section>
+
+        <section className="section shell reveal" id="final" ref={(el) => (revealRef.current[16] = el)}>
           <h2>If Your Heart Says Forgived</h2>
           <p>
             No pressure. I respect your feelings and your timing, always.
