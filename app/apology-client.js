@@ -112,7 +112,7 @@ function redirectWhatsApp(message) {
 }
 
 export default function ApologyClient() {
-  const scenes = ['top', 'letter', 'constellation', 'repair', 'challenge', 'effort', 'vault', 'meterZone', 'gardenArea', 'certificate', 'reactor', 'orbit', 'theater', 'capsule', 'final'];
+  const scenes = ['top', 'letter', 'constellation', 'repair', 'challenge', 'effort', 'vault', 'meterZone', 'gardenArea', 'certificate', 'reactor', 'orbit', 'theater', 'capsule', 'gift', 'surprise', 'final'];
   const [typedText, setTypedText] = useState('');
   const [meterValue, setMeterValue] = useState(84);
   const [meterText, setMeterText] = useState(meterStates[2]);
@@ -125,7 +125,6 @@ export default function ApologyClient() {
   const [vaultMessage, setVaultMessage] = useState('Tap a seal to open one commitment promise.');
   const [openedVault, setOpenedVault] = useState(0);
   const [checks, setChecks] = useState(Array(weeklyPlan.length).fill(false));
-  const [introVisible, setIntroVisible] = useState(true);
   const [musicOn, setMusicOn] = useState(false);
   const [activeScene, setActiveScene] = useState('top');
   const [loaderVisible, setLoaderVisible] = useState(true);
@@ -144,8 +143,17 @@ export default function ApologyClient() {
   const [storyModeOn, setStoryModeOn] = useState(false);
   const [storyIndex, setStoryIndex] = useState(0);
   const [storyCue, setStoryCue] = useState('');
+  const [musicTrack, setMusicTrack] = useState('ambient');
+  const [musicVolume, setMusicVolume] = useState(36);
+  const [giftOpen, setGiftOpen] = useState(false);
+  const [giftNote] = useState('Jiya Rani Madam Ji, every beat here says one thing: I am truly sorry, and I will prove it with actions.');
+  const [countdownValue, setCountdownValue] = useState(10);
+  const [countdownRunning, setCountdownRunning] = useState(false);
+  const [surpriseUnlocked, setSurpriseUnlocked] = useState(false);
   const holdTimerRef = useRef(null);
   const storyTimerRef = useRef(null);
+  const bgTimerRef = useRef(null);
+  const pianoStepRef = useRef(0);
 
   const skyRef = useRef(null);
   const waveRef = useRef(null);
@@ -244,14 +252,41 @@ export default function ApologyClient() {
   }, []);
 
   useEffect(() => {
+    if (bgTimerRef.current) {
+      clearInterval(bgTimerRef.current);
+      bgTimerRef.current = null;
+    }
     if (!musicOn) return undefined;
-    let flip = false;
-    const timer = setInterval(() => {
-      chime(audioCtxRef, flip ? 232 : 278, 0.012);
-      flip = !flip;
-    }, 900);
-    return () => clearInterval(timer);
-  }, [musicOn]);
+
+    const play = (freq, base = 0.05) => {
+      const scaled = (musicVolume / 100) * base;
+      chime(audioCtxRef, freq, scaled);
+    };
+
+    if (musicTrack === 'ambient') {
+      let flip = false;
+      bgTimerRef.current = setInterval(() => {
+        play(flip ? 232 : 278, 0.028);
+        flip = !flip;
+      }, 860);
+    } else if (musicTrack === 'rain') {
+      bgTimerRef.current = setInterval(() => {
+        const f = 420 + Math.random() * 420;
+        play(f, 0.018);
+      }, 220);
+    } else if (musicTrack === 'piano') {
+      const notes = [262, 330, 392, 523, 392, 330];
+      bgTimerRef.current = setInterval(() => {
+        const n = notes[pianoStepRef.current % notes.length];
+        pianoStepRef.current += 1;
+        play(n, 0.03);
+      }, 520);
+    }
+
+    return () => {
+      if (bgTimerRef.current) clearInterval(bgTimerRef.current);
+    };
+  }, [musicOn, musicTrack, musicVolume]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -480,6 +515,26 @@ export default function ApologyClient() {
     if (saved) setCapsuleText(saved);
     if (savedAt) setCapsuleSavedAt(savedAt);
   }, []);
+
+  useEffect(() => {
+    if (!countdownRunning) return undefined;
+    const timer = setInterval(() => {
+      setCountdownValue((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setCountdownRunning(false);
+          setSurpriseUnlocked(true);
+          confettiBurst();
+          chime(audioCtxRef, 820, 0.1);
+          return 0;
+        }
+        chime(audioCtxRef, 420 + (10 - prev) * 18, 0.05);
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [countdownRunning]);
 
   useEffect(() => {
     if (!storyModeOn) {
@@ -712,26 +767,6 @@ export default function ApologyClient() {
         </div>
       )}
 
-      {!loaderVisible && introVisible && (
-        <div className="intro">
-          <div className="intro__card">
-            <p>For Jiya Rani Madam Ji</p>
-            <h2>The Most Honest Sorry</h2>
-            <p>I made this to show effort, accountability, and real intention to change.</p>
-            <button
-              className="btn btn--primary"
-              onClick={() => {
-                setIntroVisible(false);
-                setMusicOn(true);
-                chime(audioCtxRef, 720, 0.08);
-              }}
-            >
-              Enter Apology Experience
-            </button>
-          </div>
-        </div>
-      )}
-
       <canvas id="sky" ref={skyRef} aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
       <div className="ribbon" aria-hidden="true" />
@@ -756,6 +791,27 @@ export default function ApologyClient() {
       >
         {musicOn ? 'Music On' : 'Music Off'}
       </button>
+      <div className="playlist-panel">
+        <label htmlFor="musicTrack">Playlist</label>
+        <select
+          id="musicTrack"
+          value={musicTrack}
+          onChange={(e) => setMusicTrack(e.target.value)}
+        >
+          <option value="piano">Soft Piano</option>
+          <option value="rain">Rain</option>
+          <option value="ambient">Ambient</option>
+        </select>
+        <label htmlFor="musicVolume">Volume: {musicVolume}%</label>
+        <input
+          id="musicVolume"
+          type="range"
+          min="0"
+          max="100"
+          value={musicVolume}
+          onChange={(e) => setMusicVolume(Number(e.target.value))}
+        />
+      </div>
       <div className="atmosphere-toggle" role="group" aria-label="Atmosphere mode">
         <button
           type="button"
@@ -1104,7 +1160,62 @@ export default function ApologyClient() {
           <p className="vault-message">{capsuleSavedAt ? `Saved at: ${capsuleSavedAt}` : 'Not saved yet.'}</p>
         </section>
 
-        <section className="section shell reveal" id="final" ref={(el) => (revealRef.current[16] = el)}>
+        <section className="section shell reveal giftbox" id="gift" ref={(el) => (revealRef.current[16] = el)}>
+          <h2>Gift Box Of Sincerity</h2>
+          <p>Click the box to open a special note written from the heart.</p>
+          <div className="gift-stage">
+            <button
+              type="button"
+              className={`gift-box ${giftOpen ? 'is-open' : ''}`}
+              onClick={() => {
+                setGiftOpen((prev) => !prev);
+                chime(audioCtxRef, giftOpen ? 460 : 760, 0.07);
+              }}
+              aria-label="Open gift box"
+            >
+              <span className="gift-lid" />
+              <span className="gift-body" />
+            </button>
+            <p className={`gift-note ${giftOpen ? 'show' : ''}`}>{giftNote}</p>
+          </div>
+        </section>
+
+        <section className="section shell reveal countdown" id="surprise" ref={(el) => (revealRef.current[17] = el)}>
+          <h2>Countdown Surprise Reveal</h2>
+          <p>Start the countdown to unlock one final heartfelt message.</p>
+          <div className="countdown-wrap">
+            <div className="countdown-clock">{countdownValue}</div>
+            <div className="countdown-actions">
+              <button
+                className="btn btn--primary"
+                onClick={() => {
+                  setCountdownValue(10);
+                  setSurpriseUnlocked(false);
+                  setCountdownRunning(true);
+                }}
+              >
+                Start Countdown
+              </button>
+              <button
+                className="btn btn--ghost"
+                onClick={() => {
+                  setCountdownRunning(false);
+                  setCountdownValue(10);
+                  setSurpriseUnlocked(false);
+                }}
+              >
+                Reset
+              </button>
+              {surpriseUnlocked && (
+                <p className="vault-message">
+                  Jiya Rani Madam Ji, this apology is not temporary. I will keep proving my fault acceptance with consistency.
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="section shell reveal" id="final" ref={(el) => (revealRef.current[18] = el)}>
           <h2>If Your Heart Says Forgived</h2>
           <p>
             No pressure. I respect your feelings and your timing, always.
