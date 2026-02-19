@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>For Jiya | The Apology I Owe You</title>
+    <meta
+      name="description"
+      content="A cinematic and deeply emotional apology website for Jiya, with immersive interactions and heartfelt storytelling."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Sora:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <canvas id="sky" aria-hidden="true"></canvas>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="hero shell" id="top">
+      <p class="eyebrow reveal">An honest letter, not an excuse</p>
+      <h1 class="reveal delay-1">Jiya, I Am Truly Sorry</h1>
+      <p class="lead reveal delay-2">
+        I am here to accept every mistake and every fault I made. I hurt you, and I own that completely.
+        This page is my promise in actions, not just words.
+      </p>
+      <div class="hero__actions reveal delay-3">
+        <a href="#letter" class="btn btn--primary">Read My Heart</a>
+        <a href="#constellation" class="btn btn--ghost">Open Our Sky</a>
+      </div>
+      <button class="down" aria-label="Scroll to letter" data-scroll="#letter">Scroll</button>
+    </header>
+
+    <main>
+      <section class="section shell reveal" id="letter">
+        <h2>My Honest Confession</h2>
+        <p>
+          Jiya, I made mistakes that I cannot justify. I said things I should never have said,
+          and I acted in ways that made your heart heavy. You gave trust, and I failed to protect it.
+          I accept this fully.
+        </p>
+        <p>
+          I am sorry for my behavior, my carelessness, and every moment where you felt unloved
+          because of me. No excuses. No blame. Only truth.
+        </p>
+        <div class="typebox" aria-live="polite">
+          <span id="typed"></span><span class="cursor">|</span>
+        </div>
+      </section>
+
+      <section class="section split" id="constellation">
+        <article class="shell reveal">
+          <h2>Memory Constellation</h2>
+          <p>
+            Tap each star. Every star carries one truth I should have lived by.
+          </p>
+          <p id="starMessage" class="star-message">Touch a star to reveal a message.</p>
+        </article>
+        <article class="shell constellation reveal delay-1" id="starField" aria-label="Interactive memory stars"></article>
+      </section>
+
+      <section class="section shell reveal" id="repair">
+        <h2>Repair Plan, Not Just Apology</h2>
+        <div class="timeline" id="timeline">
+          <button class="timeline__item" data-label="I will listen with patience before reacting.">Listen first</button>
+          <button class="timeline__item" data-label="I will protect your peace even when my ego wants to argue.">Protect your peace</button>
+          <button class="timeline__item" data-label="I will stay transparent, honest, and emotionally available.">Be transparent</button>
+          <button class="timeline__item" data-label="I will prove change with consistency every day.">Prove with action</button>
+        </div>
+        <p class="timeline__echo" id="timelineEcho">Click each promise and hold me accountable to it.</p>
+      </section>
+
+      <section class="section shell reveal" id="meterZone">
+        <h2>Apology Resonance Meter</h2>
+        <p>Move this slider and watch the apology become deeper and more committed.</p>
+        <label for="meter" class="sr-only">Apology resonance meter</label>
+        <input id="meter" type="range" min="0" max="100" value="84" />
+        <div class="meter-row"><div class="meter-fill" id="meterFill"></div></div>
+        <p class="meter-text" id="meterText"></p>
+      </section>
+
+      <section class="section split" id="gardenArea">
+        <article class="shell reveal">
+          <h2>Forgiveness Garden</h2>
+          <p>
+            Every click plants a flower that carries one apology. Keep planting,
+            and let this garden show how serious I am about fixing what I broke.
+          </p>
+          <button class="btn btn--primary" id="plantBtn">Plant One Apology</button>
+          <p class="garden-count" id="gardenCount">Flowers planted: 0</p>
+        </article>
+        <article class="shell garden reveal delay-1" id="garden" aria-live="polite"></article>
+      </section>
+
+      <section class="section shell reveal" id="final">
+        <h2>Will You Give Me A Chance To Make This Right?</h2>
+        <p>
+          Even if your answer is not now, I respect your heart. I will still show growth,
+          patience, and sincerity every day.
+        </p>
+        <div class="hero__actions">
+          <button class="btn btn--primary" id="yesBtn">Yes, One Chance</button>
+          <button class="btn btn--ghost" id="timeBtn">I Need Time</button>
+        </div>
+        <p id="response" class="response" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <footer>
+      <p>Made with sincerity for Jiya.</p>
+      <a href="#top">Back to top</a>
+    </footer>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
